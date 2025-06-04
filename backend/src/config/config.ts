@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiConfig } from '../interfaces/exchange.interface';
-import {
-  ConfigurationValues,
-  ConfigurationError,
-} from '../types/configuration.types';
+import { ExchangeApiConfig } from 'src/exchange/types';
+import { ConfigurationValues, ConfigurationError } from 'src/config/types';
 
 @Injectable()
-export class ExchangeConfigurationService {
+export class ConfigurationService {
   constructor(private readonly configService: ConfigService) {}
 
-  getConfiguration(): ApiConfig {
-    const values = this.extractConfigurationValues();
-    this.validateConfiguration(values);
+  getConfig(): ExchangeApiConfig {
+    const values = this.extractConfigValues();
+    this.validateConfig(values);
 
     return {
       url: values.exchangeApiUrl,
@@ -20,14 +17,14 @@ export class ExchangeConfigurationService {
     };
   }
 
-  private extractConfigurationValues(): ConfigurationValues {
+  private extractConfigValues(): ConfigurationValues {
     return {
       exchangeApiUrl: this.configService.get<string>('EXCHANGE_API_URL') ?? '',
       exchangeApiKey: this.configService.get<string>('EXCHANGE_API_KEY') ?? '',
     };
   }
 
-  private validateConfiguration(values: ConfigurationValues): void {
+  private validateConfig(values: ConfigurationValues): void {
     if (!values.exchangeApiUrl) {
       throw new ConfigurationError('EXCHANGE_API_URL is not configured');
     }

@@ -9,16 +9,16 @@ import { Cache } from 'cache-manager';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import {
-  ExchangeRateResponse,
-  ApiConfig,
-} from './interfaces/exchange.interface';
-import { Transaction } from './interfaces/transaction.interface';
-import { ExchangeConfigurationService } from './services/configuration.service';
-import { ErrorHandler } from './utils/error.handler';
-import { ValidationUtils } from './utils/validation.utils';
-import { MathUtils } from './utils/math.utils';
-import { CacheUtils } from './utils/cache.utils';
-import { DateUtils } from './utils/date.utils';
+  ExchangeApiConfig,
+  ExchangeRateApiResponse,
+  ExchangeTransaction,
+} from 'src/exchange/types';
+import { ConfigurationService } from 'src/config/config';
+import { ErrorHandler } from 'src/exchange/utils/error.handler';
+import { ValidationUtils } from 'src/exchange/utils/validation.utils';
+import { CacheUtils } from 'src/exchange/utils/cache.utils';
+import { MathUtils } from 'src/exchange/utils/math.utils';
+import { DateUtils } from 'src/exchange/utils/date.utils';
 
 @Injectable()
 export class ExchangeService {
@@ -26,15 +26,15 @@ export class ExchangeService {
   private readonly errorHandler = new ErrorHandler(this.logger);
   private readonly CACHE_KEY = 'EUR_PLN_RATE';
   private readonly CACHE_TTL = 60 * 1000;
-  private readonly transactions: Transaction[] = [];
-  private readonly apiConfig: ApiConfig;
+  private readonly transactions: ExchangeTransaction[] = [];
+  private readonly apiConfig: ExchangeApiConfig;
 
   constructor(
-    private readonly configurationService: ExchangeConfigurationService,
+    private readonly configurationService: ConfigurationService,
     private readonly httpService: HttpService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
-    this.apiConfig = this.configurationService.getConfiguration();
+    this.apiConfig = this.configurationService.getConfig();
   }
 
   async getExchangeRate(): Promise<number> {
@@ -63,7 +63,7 @@ export class ExchangeService {
 
   private async fetchFreshRate(): Promise<number> {
     const response = await firstValueFrom(
-      this.httpService.get<ExchangeRateResponse>(this.apiConfig.url, {
+      this.httpService.get<ExchangeRateApiResponse>(this.apiConfig.url, {
         headers: { 'x-api-key': this.apiConfig.apiKey },
         timeout: 5000,
       }),
@@ -107,7 +107,7 @@ export class ExchangeService {
     );
   }
 
-  async simulateTransaction(eur: number): Promise<Transaction> {
+  async simulateTransaction(eur: number): Promise<ExchangeTransaction> {
     this.validateEurAmount(eur);
 
     const rate = await this.getExchangeRate();
@@ -127,7 +127,7 @@ export class ExchangeService {
     }
   }
 
-  private createTransaction(eur: number, rate: number): Transaction {
+  private createTransaction(eur: number, rate: number): ExchangeTransaction {
     return {
       eur,
       pln: MathUtils.calculateConversion(eur, rate),
@@ -136,7 +136,7 @@ export class ExchangeService {
     };
   }
 
-  getTransactions(): readonly Transaction[] {
+  getTransactions(): readonly ExchangeTransaction[] {
     return Object.freeze([...this.transactions]);
   }
 

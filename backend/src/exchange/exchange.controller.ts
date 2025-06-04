@@ -9,10 +9,10 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ExchangeService } from './exchange.service';
-import { Transaction } from './interfaces/transaction.interface';
-import { SimulateTransactionDto } from './dto/simulate-transaction.dto';
-import { DateUtils } from './utils/date.utils';
+import { SimulateTransactionDto } from 'src/exchange/dto/simulate-transaction.dto';
+import { DateUtils } from 'src/exchange/utils/date.utils';
+import { ExchangeTransaction } from 'src/exchange/types';
+import { ExchangeService } from 'src/exchange/exchange.service';
 
 @Controller('exchange')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -32,13 +32,13 @@ export class ExchangeController {
   @HttpCode(HttpStatus.CREATED)
   async simulateTransaction(
     @Body() simulateDto: SimulateTransactionDto,
-  ): Promise<Transaction> {
+  ): Promise<ExchangeTransaction> {
     return this.exchangeService.simulateTransaction(simulateDto.eur);
   }
 
   @Get('transactions')
   getTransactions(): {
-    transactions: readonly Transaction[];
+    transactions: readonly ExchangeTransaction[];
     count: number;
   } {
     const transactions = this.exchangeService.getTransactions();

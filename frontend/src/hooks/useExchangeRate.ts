@@ -1,17 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-
-export interface ExchangeRate {
-  rate: number;
-  timestamp: string;
-}
+import { ExchangeRate } from "@/types";
+import { QUERY_KEYS, API_ENDPOINTS } from "@/consts";
 
 export const useExchangeRate = () =>
   useQuery<ExchangeRate, Error>({
-    queryKey: ["exchange-rate"],
+    queryKey: [QUERY_KEYS.EXCHANGE_RATE],
     queryFn: async () => {
       const { data } = await axios.get<ExchangeRate>(
-        `${process.env.NEXT_PUBLIC_API_URL}/exchange/rate`
+        `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.EXCHANGE.RATE}`
       );
       return data;
     },

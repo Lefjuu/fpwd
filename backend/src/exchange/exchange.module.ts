@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
-import { ExchangeController } from './exchange.controller';
-import { ExchangeService } from './exchange.service';
-import { ExchangeConfigurationService } from './services/configuration.service';
+import { ConfigurationService } from 'src/config/config';
+import { ExchangeController } from 'src/exchange/exchange.controller';
+import { ExchangeService } from 'src/exchange/exchange.service';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { ExchangeConfigurationService } from './services/configuration.service';
     ConfigModule,
   ],
   controllers: [ExchangeController],
-  providers: [ExchangeService, ExchangeConfigurationService],
+  providers: [ExchangeService, ConfigurationService],
   exports: [ExchangeService],
 })
 export class ExchangeModule {}
